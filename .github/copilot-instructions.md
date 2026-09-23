@@ -19,3 +19,12 @@ mainframe in this environment.
   run COBOL — if `cobc` is unavailable, state `manual-gate` explicitly.
 - Agents must NOT modify `jcl/**` to claim it is runnable in this environment.
 - Agents must NOT merge PRs or trigger any deployment.
+
+## Jira-triggered pipeline
+A Jira issue creation dispatches `jira-pipeline.yaml`, which opens a
+`stage:spec` issue assigned to Copilot. Each stage's merged PR
+(`jira-stage-advance.yaml`) opens the next stage issue automatically:
+spec -> impact -> dev -> qa -> security -> read-only release-readiness
+verdict (build stays `manual-gate` throughout). Do not remove
+`stage:*`/`jira:*` labels from issues/PRs — the chain relies on them. See
+`scripts/jira-stage-issue.sh`.
