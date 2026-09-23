@@ -7,7 +7,8 @@ no real mainframe access in this environment.**
 - `src/POLCALC.cbl` — computes policy payout from premium + risk %.
 - `src/PREMVAL.cbl` — validates a premium is within an accepted band.
 - `src/RPTGEN.cbl` — emits a simple text report line for a policy.
-- `copybooks/POLICYREC.cpy` — shared policy record layout, `COPY`'d by all three programs.
+- `src/CLAIMCHK.cbl` — flags whether a claim amount exceeds the policy payout.
+- `copybooks/POLICYREC.cpy` — shared policy record layout, `COPY`'d by all four programs.
 - `jcl/POLCALCJ.jcl` — batch JCL stub showing intended job structure. **Not
   executable here** — no JES/mainframe emulator present; documented for
   format reference only.
@@ -25,9 +26,11 @@ no real mainframe access in this environment.**
 cobc -x -o polcalc src/POLCALC.cbl
 cobc -x -o premval src/PREMVAL.cbl
 cobc -x -o rptgen  src/RPTGEN.cbl
+cobc -x -o claimchk src/CLAIMCHK.cbl
 ./polcalc
 ./premval
 ./rptgen
+./claimchk
 ```
 (`-I copybooks` is not required here since programs use a plain `COPY`
 statement resolved via `cobc`'s default copybook search path; pass
