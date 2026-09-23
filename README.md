@@ -42,3 +42,34 @@ but to have materially weaker ability to compile, run, or verify COBOL
 changes end-to-end compared to the Java repo, since there is no local
 toolchain or CI step exercising the compiler. This gap is itself a recorded
 finding of the POC (see `POC-RESULTS.md` at the workspace root).
+
+## Copilot agents
+- `.github/copilot-instructions.md` — stack conventions and agent boundaries.
+- `.github/workflows/copilot-setup-steps.yml` — best-effort GnuCOBOL install
+  for Copilot's cloud coding agent (falls back to manual-gate).
+- Org-level agent personas (`ba-spec`, `architect-impact`, `developer`,
+  `qa-test`, `security-review`, `release-readiness`) live in
+  [AIDLC-Research-1/.github-private](https://github.com/AIDLC-Research-1/.github-private)
+  and are visible org-wide in Copilot Chat.
+
+## Jira-triggered pipeline
+A Jira issue creation event (via Jira Automation → `repository_dispatch`)
+kicks off a 5-stage chain, each stage a Copilot-assigned issue whose merged
+PR (human-approved — branch protection requires 1 review) triggers the next:
+
+```
+spec -> impact -> dev -> qa -> security -> release-readiness (read-only verdict)
+```
+
+- `.github/workflows/jira-pipeline.yaml` — entry point (stage 1: spec).
+- `.github/workflows/jira-stage-advance.yaml` — chains stages 2-5 on PR merge.
+- `.github/workflows/jira-pr-label-sync.yaml` — copies `stage:*`/`jira:*`
+  labels from a stage issue onto the PR Copilot opens for it.
+- The stage logic itself is a **reusable workflow** hosted in
+  `AIDLC-Research-1/.github-private` (shared with `poc-java-app`), called
+  with `manual_gate: "true"` here so `dev`/`qa` stage prompts and the final
+  verdict correctly state the build stays manual-gate.
+
+No stage in this chain can merge or deploy on its own; every PR requires a
+human approval.
+
